@@ -8,7 +8,7 @@
     <!-- Toolset -->
     <RoslynToolsMicrosoftRepoToolsetVersion>1.0.0-alpha7</RoslynToolsMicrosoftRepoToolsetVersion>
     <RoslynToolsMicrosoftXUnitLoggerVersion>1.0.0-alpha1</RoslynToolsMicrosoftXUnitLoggerVersion>
-    <DotNetCliVersion>1.0.0-rc4-004777</DotNetCliVersion>
+    <DotNetCliVersion>2.0.0-alpha-005156</DotNetCliVersion>
     <MicroBuildCoreVersion>0.2.0</MicroBuildCoreVersion>
     <MicroBuildPluginsSwixBuildVersion>1.0.101</MicroBuildPluginsSwixBuildVersion>
     <RoslynToolsMicrosoftSignToolVersion>0.3.1-beta</RoslynToolsMicrosoftSignToolVersion>
