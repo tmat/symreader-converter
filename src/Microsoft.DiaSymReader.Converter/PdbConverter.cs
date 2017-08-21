@@ -110,7 +110,7 @@ namespace Microsoft.DiaSymReader.Tools
             StreamUtilities.ValidateStream(peStream, nameof(peStream), readRequired: true, seekRequired: true);
             using (var peReader = new PEReader(peStream, PEStreamOptions.LeaveOpen))
             {
-                ConvertPortableToWindows(peReader, sourcePdbStream, targetPdbStream, options);
+                ConvertPortableToWindows(peReader, sourcePdbStream, targetPdbStream, null, options);
             }
         }
 
@@ -120,6 +120,7 @@ namespace Microsoft.DiaSymReader.Tools
         /// <param name="peReader">PE reader.</param>
         /// <param name="sourcePdbStream">Source stream of Portable PDB data. Must be readable.</param>
         /// <param name="targetPdbStream">Target stream of Windows PDB data. Must be writable.</param>
+        /// <param name="addSourceLink"></param>
         /// <param name="options">Conversion options.</param>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/>, <paramref name="sourcePdbStream"/>, or <paramref name="targetPdbStream"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="sourcePdbStream"/> does not support reading.</exception>
@@ -128,13 +129,13 @@ namespace Microsoft.DiaSymReader.Tools
         /// <exception cref="InvalidDataException">The PDB doesn't match the CodeView Debug Directory record in the PE image.</exception>
         /// <exception cref="IOException">IO error while reading from or writing to a stream.</exception>
         /// <exception cref="ObjectDisposedException">Stream has been disposed while reading/writing.</exception>
-        public void ConvertPortableToWindows(PEReader peReader, Stream sourcePdbStream, Stream targetPdbStream, PdbConversionOptions options = default(PdbConversionOptions))
+        public void ConvertPortableToWindows(PEReader peReader, Stream sourcePdbStream, Stream targetPdbStream, Stream addSourceLink, PdbConversionOptions options = default(PdbConversionOptions))
         {
             StreamUtilities.ValidateStream(sourcePdbStream, nameof(sourcePdbStream), readRequired: true);
 
             using (var pdbReaderProvider = MetadataReaderProvider.FromPortablePdbStream(sourcePdbStream, MetadataStreamOptions.LeaveOpen))
             {
-                ConvertPortableToWindows(peReader, pdbReaderProvider.GetMetadataReader(), targetPdbStream, options);
+                ConvertPortableToWindows(peReader, pdbReaderProvider.GetMetadataReader(), targetPdbStream, addSourceLink, options);
             }
         }
 
@@ -144,6 +145,7 @@ namespace Microsoft.DiaSymReader.Tools
         /// <param name="peReader">PE reader.</param>
         /// <param name="pdbReader">Portable PDB reader.</param>
         /// <param name="targetPdbStream">Target stream of Windows PDB data. Must be writable.</param>
+        /// <param name="addSourceLink"></param>
         /// <param name="options">Conversion options.</param>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/>, <paramref name="pdbReader"/>, or <paramref name="targetPdbStream"/> is null.</exception>
         /// <exception cref="ArgumentException"><paramref name="targetPdbStream"/> does not support writing.</exception>
@@ -151,7 +153,7 @@ namespace Microsoft.DiaSymReader.Tools
         /// <exception cref="InvalidDataException">The PDB doesn't match the CodeView Debug Directory record in the PE image.</exception>
         /// <exception cref="IOException">IO error while reading from or writing to a stream.</exception>
         /// <exception cref="ObjectDisposedException">Stream has been disposed while reading/writing.</exception>
-        public void ConvertPortableToWindows(PEReader peReader, MetadataReader pdbReader, Stream targetPdbStream, PdbConversionOptions options = default(PdbConversionOptions))
+        public void ConvertPortableToWindows(PEReader peReader, MetadataReader pdbReader, Stream targetPdbStream, Stream addSourceLink, PdbConversionOptions options = default(PdbConversionOptions))
         {
             if (pdbReader == null)
             {
@@ -162,7 +164,7 @@ namespace Microsoft.DiaSymReader.Tools
 
             using (var pdbWriter = SymUnmanagedWriterFactory.CreateWriter(new SymMetadataProvider(peReader.GetMetadataReader())))
             {
-                ConvertPortableToWindows(peReader, pdbReader, pdbWriter, options);
+                ConvertPortableToWindows(peReader, pdbReader, pdbWriter, addSourceLink, options);
                 pdbWriter.WriteTo(targetPdbStream);
             }
         }
@@ -173,17 +175,19 @@ namespace Microsoft.DiaSymReader.Tools
         /// <param name="peReader">PE reader.</param>
         /// <param name="pdbReader">Portable PDB reader.</param>
         /// <param name="pdbWriter">PDB writer.</param>
+        /// <param name="addSourceLink"></param>
         /// <param name="options">Conversion options.</param>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/>, <paramref name="pdbReader"/>, or <paramref name="pdbWriter"/> is null.</exception>
         /// <exception cref="BadImageFormatException">The format of the PE image or the source PDB image is invalid.</exception>
         /// <exception cref="InvalidDataException">The PDB doesn't match the CodeView Debug Directory record in the PE image.</exception>
         /// <exception cref="IOException">IO error while reading from or writing to a stream.</exception>
-        public void ConvertPortableToWindows(PEReader peReader, MetadataReader pdbReader, SymUnmanagedWriter pdbWriter, PdbConversionOptions options)
+        public void ConvertPortableToWindows(PEReader peReader, MetadataReader pdbReader, SymUnmanagedWriter pdbWriter, Stream addSourceLink, PdbConversionOptions options)
         {
             new PdbConverterPortableToWindows(_diagnosticReporterOpt).Convert(
                 peReader ?? throw new ArgumentNullException(nameof(peReader)), 
                 pdbReader ?? throw new ArgumentNullException(nameof(pdbReader)),
-                pdbWriter ?? throw new ArgumentNullException(nameof(pdbWriter)), 
+                pdbWriter ?? throw new ArgumentNullException(nameof(pdbWriter)),
+                addSourceLink,
                 options);
         }
     }

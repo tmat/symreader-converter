@@ -58,7 +58,7 @@ namespace Microsoft.DiaSymReader.Tools
                 s_languageVendorMicrosoft : default(Guid);
         }
 
-        internal void Convert(PEReader peReader, MetadataReader pdbReader, SymUnmanagedWriter pdbWriter, PdbConversionOptions options)
+        internal void Convert(PEReader peReader, MetadataReader pdbReader, SymUnmanagedWriter pdbWriter, Stream addSourceLinkOpt,  PdbConversionOptions options)
         {
             if (!SymReaderHelpers.TryReadPdbId(peReader, out var pePdbId, out int peAge))
             {
@@ -434,6 +434,19 @@ namespace Microsoft.DiaSymReader.Tools
                 else
                 {
                     pdbWriter.SetSourceLinkData(pdbReader.GetBlobBytes(sourceLinkHandle));
+                }
+            }
+            else if (addSourceLinkOpt != null)
+            {
+                if ((options & PdbConversionOptions.SuppressSourceLinkConversion) == 0)
+                {
+                    ConvertSourceServerData(new StreamReader(addSourceLinkOpt, Encoding.UTF8).ReadToEnd(), pdbWriter, documentNames);
+                }
+                else
+                {
+                    var memoryStream = new MemoryStream();
+                    addSourceLinkOpt.CopyTo(memoryStream);
+                    pdbWriter.SetSourceLinkData(memoryStream.ToArray());
                 }
             }
 

@@ -85,6 +85,7 @@ namespace Microsoft.DiaSymReader.Tools.UnitTests
                 peFilePath: pe.Path,
                 pdbFilePathOpt: pdb.Path,
                 outPdbFilePathOpt: outPdbPath,
+                addSourceLink: null,
                 options: PdbConversionOptions.Default,
                 extract: false,
                 verbose: false));
@@ -133,6 +134,7 @@ SRCSRV: end ------------------------------------------------", actual);
                 pdbFilePathOpt: null,
                 outPdbFilePathOpt: outPdb.Path,
                 options: PdbConversionOptions.SuppressSourceLinkConversion,
+                addSourceLink: null,
                 extract: false,
                 verbose: false));
 
@@ -156,6 +158,7 @@ SRCSRV: end ------------------------------------------------", actual);
                 peFilePath: pe.Path,
                 pdbFilePathOpt: null,
                 outPdbFilePathOpt: outPdb.Path,
+                addSourceLink: null,
                 options: PdbConversionOptions.SuppressSourceLinkConversion,
                 extract: false,
                 verbose: false));
@@ -181,6 +184,7 @@ SRCSRV: end ------------------------------------------------", actual);
                 pdbFilePathOpt: null,
                 outPdbFilePathOpt: null,
                 options: PdbConversionOptions.Default,
+                addSourceLink: null,
                 extract: true,
                 verbose: false));
 
@@ -199,6 +203,7 @@ SRCSRV: end ------------------------------------------------", actual);
                 pdbFilePathOpt: null,
                 outPdbFilePathOpt: outPdb.Path,
                 options: PdbConversionOptions.Default,
+                addSourceLink: null,
                 extract: true,
                 verbose: false));
 
@@ -219,6 +224,7 @@ SRCSRV: end ------------------------------------------------", actual);
                     pdbFilePathOpt: null,
                     outPdbFilePathOpt: outPdb.Path,
                     options: PdbConversionOptions.Default,
+                    addSourceLink: null,
                     extract: true,
                     verbose: false)));
 
@@ -238,6 +244,7 @@ SRCSRV: end ------------------------------------------------", actual);
                 pdbFilePathOpt: null,
                 outPdbFilePathOpt: outPdb.Path,
                 options: PdbConversionOptions.Default,
+                addSourceLink: null,
                 extract: false,
                 verbose: false));
 

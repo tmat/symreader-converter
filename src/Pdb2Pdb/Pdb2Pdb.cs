@@ -18,15 +18,17 @@ namespace Microsoft.DiaSymReader.Tools
             public readonly string PEFilePath;
             public readonly string PdbFilePathOpt;
             public readonly string OutPdbFilePathOpt;
+            public readonly string AddSourceLinkOpt;
             public readonly PdbConversionOptions Options;
             public readonly bool Extract;
             public readonly bool Verbose;
 
-            public Args(string peFilePath, string pdbFilePathOpt, string outPdbFilePathOpt, PdbConversionOptions options, bool extract, bool verbose)
+            public Args(string peFilePath, string pdbFilePathOpt, string outPdbFilePathOpt, string addSourceLink, PdbConversionOptions options, bool extract, bool verbose)
             {
                 PEFilePath = peFilePath;
                 PdbFilePathOpt = pdbFilePathOpt;
                 OutPdbFilePathOpt = outPdbFilePathOpt;
+                AddSourceLinkOpt = addSourceLink;
                 Options = options;
                 Extract = extract;
                 Verbose = verbose;
@@ -69,6 +71,7 @@ namespace Microsoft.DiaSymReader.Tools
             bool verbose = false;
             string inPdb = null;
             string outPdb = null;
+            string addSourceLink = null;
 
             int i = 0;
             while (i < args.Length)
@@ -97,6 +100,10 @@ namespace Microsoft.DiaSymReader.Tools
 
                     case "/out":
                         outPdb = ReadValue();
+                        break;
+
+                    case "/addsource":
+                        addSourceLink = ReadValue();
                         break;
 
                     default:
@@ -147,7 +154,7 @@ namespace Microsoft.DiaSymReader.Tools
                 options |= PdbConversionOptions.SuppressSourceLinkConversion;
             }
 
-            return new Args(peFile, inPdb, outPdb, options, extract, verbose);
+            return new Args(peFile, inPdb, outPdb, addSourceLink, options, extract, verbose);
         }
 
         // internal for testing
@@ -168,11 +175,12 @@ namespace Microsoft.DiaSymReader.Tools
                     Debug.Assert(args.OutPdbFilePathOpt != null);
 
                     using (var srcPdbStreamOpt = OpenFileForRead(args.PdbFilePathOpt))
+                    using (var addSourceLinkStreamOpt = (args.AddSourceLinkOpt != null) ? OpenFileForRead(args.AddSourceLinkOpt) : null)
                     {
                         var outPdbStream = new MemoryStream();
                         if (PdbConverter.IsPortable(srcPdbStreamOpt))
                         {
-                            converter.ConvertPortableToWindows(peReader, srcPdbStreamOpt, outPdbStream, args.Options);
+                            converter.ConvertPortableToWindows(peReader, srcPdbStreamOpt, outPdbStream, addSourceLinkStreamOpt, args.Options);
                         }
                         else
                         {
@@ -201,7 +209,11 @@ namespace Microsoft.DiaSymReader.Tools
                             Debug.Assert(args.OutPdbFilePathOpt != null);
 
                             var dstPdbStream = new MemoryStream();
-                            converter.ConvertPortableToWindows(peReader, pdbReader, dstPdbStream, args.Options);
+                            using (var addSourceLinkStreamOpt = (args.AddSourceLinkOpt != null) ? OpenFileForRead(args.AddSourceLinkOpt) : null)
+                            {
+                                converter.ConvertPortableToWindows(peReader, pdbReader, dstPdbStream, addSourceLinkStreamOpt, args.Options);
+                            }
+
                             WriteAllBytes(args.OutPdbFilePathOpt, dstPdbStream);
                         }
                     }
