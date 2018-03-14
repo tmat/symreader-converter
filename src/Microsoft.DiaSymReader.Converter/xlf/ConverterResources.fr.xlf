@@ -252,6 +252,11 @@
         <target state="new">none</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidLocalScopeTableOrdering">
+        <source>LocalScope table is not ordered correctly -- scope 0x{0:X8} is misordered and will be omitted</source>
+        <target state="new">LocalScope table is not ordered correctly -- scope 0x{0:X8} is misordered and will be omitted</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -137,6 +137,8 @@ namespace Microsoft.DiaSymReader.Tools
 
             int localScopeRowNumber = 0;
             int localScopeCount = pdbReader.GetTableRowCount(TableIndex.LocalScope);
+            int previousLocalScopeStartOffset = int.MinValue;
+            int previousLocalScopeLength = int.MaxValue;
 
             int CompareScopeRanges(int leftStart, int leftEnd, int rightStart, int rightEnd)
             {
@@ -210,15 +212,45 @@ namespace Microsoft.DiaSymReader.Tools
                 {
                     Debug.Assert(localScopeRowNumber <= localScopeCount);
 
-                    LocalScope? nextLocalScope = null;
+                    LocalScope? nextLocalScope;
                     int nextLocalScopeIndex = localScopeRowNumber + 1;
-                    if (nextLocalScopeIndex <= localScopeCount)
+
+                    while (true)
                     {
+                        if (nextLocalScopeIndex > localScopeCount)
+                        {
+                            nextLocalScope = null;
+                            previousLocalScopeStartOffset = int.MinValue;
+                            previousLocalScopeLength = int.MaxValue;
+                            break;
+                        }
+
                         var scope = pdbReader.GetLocalScope(MetadataTokens.LocalScopeHandle(nextLocalScopeIndex));
                         if (scope.Method == methodDefHandle)
                         {
-                            nextLocalScope = scope;
+                            // Check ordering to avoid unexpected failures without a good diagnostic.
+                            // Spec: "The table is required to be sorted first by Method in ascending order, 
+                            // then by StartOffset in ascending order, then by Length in descending order."
+                            if (scope.StartOffset > previousLocalScopeStartOffset ||
+                                scope.StartOffset == previousLocalScopeStartOffset && scope.Length <= previousLocalScopeLength)
+                            {
+                                nextLocalScope = scope;
+                                previousLocalScopeStartOffset = scope.StartOffset;
+                                previousLocalScopeLength = scope.Length;
+                                break;
+                            }
                         }
+                        else if (MetadataTokens.GetRowNumber(scope.Method) > MetadataTokens.GetRowNumber(methodDefHandle))
+                        {
+                            nextLocalScope = null;
+                            previousLocalScopeStartOffset = int.MinValue;
+                            previousLocalScopeLength = int.MaxValue;
+                            break;
+                        }
+
+                        // skip out of order scope:
+                        ReportDiagnostic(PdbDiagnosticId.InvalidLocalScopeTableOrdering, methodToken, MetadataTokens.GetToken(MetadataTokens.LocalScopeHandle(nextLocalScopeIndex));
+                        nextLocalScopeIndex++;
                     }
 
                     StateMachineHoistedLocalScope? nextHoistedScope = null;

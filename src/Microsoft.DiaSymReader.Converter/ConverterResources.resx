@@ -267,4 +267,7 @@
   <data name="None" xml:space="preserve">
     <value>none</value>
   </data>
+  <data name="InvalidLocalScopeTableOrdering" xml:space="preserve">
+    <value>LocalScope table is not ordered correctly -- scope 0x{0:X8} is misordered and will be omitted</value>
+  </data>
 </root>

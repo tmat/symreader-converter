@@ -37,6 +37,7 @@ namespace Microsoft.DiaSymReader.Tools
         InvalidSourceLink = 28,
         MalformedSourceLinkUrl = 29,
         SourceChecksumAlgorithmSizeMismatch = 30,
+        InvalidLocalScopeTableOrdering = 31,
     }
 
     internal static class PdbDiagnosticIdExtensions
@@ -78,6 +79,7 @@ namespace Microsoft.DiaSymReader.Tools
                 case PdbDiagnosticId.InvalidSourceLink: return ConverterResources.InvalidSourceLink;
                 case PdbDiagnosticId.MalformedSourceLinkUrl: return ConverterResources.MalformedSourceLinkUrl;
                 case PdbDiagnosticId.SourceChecksumAlgorithmSizeMismatch: return ConverterResources.SourceChecksumAlgorithmSizeMismatch;
+                case PdbDiagnosticId.InvalidLocalScopeTableOrdering: return ConverterResources.InvalidLocalScopeTableOrdering;
 
                 default:
                     throw ExceptionUtilities.UnexpectedValue(id);
